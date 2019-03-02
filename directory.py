@@ -2,7 +2,7 @@ import congregate_session
 import re
 
 
-DATE_RE    = "^[0-9]{2}\/[0-9]{2}"
+DATE_RE = "^[0-9]{2}\/[0-9]{2}"
 CELL_QUERY = 'a[href^="tel:"]'
 EMAIL_QUERY = 'a[href^="mailto:"]'
 
