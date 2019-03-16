@@ -63,10 +63,9 @@ def get_all_member_numbers(soup, name):
 # TODO: Add Address
 def process_family_members(soup):
     family_members = {}
-    adress = "hello"
+    address = get_address(soup)
     anniversary = get_family_date(soup, "Anniversary")
-    home_phone = strip_tag(soup.find('strong', string=re.compile("Home"))
-                           .find_parent('p').select_one('p a'))
+    home_phone = get_home_phone(soup)
     for index, member in enumerate(soup.select('li')):
         email = strip_tag(member.select_one(EMAIL_QUERY))
         cell_phone = get_family_cell_phone(member)
@@ -86,11 +85,10 @@ def process_family_members(soup):
 # TODO: Fix Address
 def process_single_members(soup):
     name = " ".join(strip_tag(soup.body.div.div.h1).split(', ')[::-1])
-    address = "hello"
+    address = get_address(soup)
     email = strip_tag(soup.select_one(EMAIL_QUERY))
     cell_phone = get_single_cell_phone(soup)
-    home_phone = strip_tag(soup.find('strong', string=re.compile("Home"))
-                           .find_parent('p').select_one('p a'))
+    home_phone = get_home_phone(soup)
     birthday = strip_tag(soup.find('p', string=re.compile(DATE_RE)))
     single_member = {}
     single_member[name] = {
@@ -109,6 +107,22 @@ def get_family_date(soup, date):
             else None)
 
 
+def get_address(soup):
+    address_tag = soup.find('strong', string=re.compile("Address"))
+    address = (None if not address_tag
+               else strip_tag(address_tag.find_next_sibling('a')))
+    address = address.replace('\n\t\t\t\t', ' ').replace('\n\t\t', ' ')
+    maps_link = address_tag.find_next_sibling('a')['href']
+    return (None if not address_tag
+            else "{0}\n{1}".format(address, maps_link))
+
+
+def get_home_phone(soup):
+    home_phone_tag = soup.find('strong', string=re.compile("Home"))
+    return (None if not home_phone_tag
+            else strip_tag(home_phone_tag.find_parent('p').select_one('p a')))
+
+
 def get_single_cell_phone(soup):
     cell_phone = soup.find('h4', string=re.compile("Cell"))
     return (
@@ -123,109 +137,3 @@ def get_family_cell_phone(soup):
 
 def strip_tag(tag):
     return None if not tag else tag.text.strip()
-
-
-print(get_church_member_info('Carlos', None))
-
-
-
-# __USERNAME = login["username"]
-# __PASSWORD = login["password"]
-# __LOGIN_URL = urls["login_url"]
-# __DIRECTORY_URL = urls["directory_url"]
-# __DASHBOARD_URL = urls["dashboard_url"]
-# __FAMILY_URL = urls["family_url"]
-
-# session_requests = requests.session()
-
-
-# # def login_congregate():
-# #     # Login
-# #     login_page = session_requests.get(__LOGIN_URL)
-# #     payload = {
-# #         "username": __USERNAME,
-# #         "password": __PASSWORD
-# #     }
-# #     login_page = session_requests.post(
-# #         __LOGIN_URL,
-# #         data=payload,
-# #         headers=dict(referer=__LOGIN_URL)
-# #     )
-
-# def get_church_member_page(first_name, last_name):
-#     # Directory Searching
-#     directory_soup = get_directory_page_soup()
-#     if last_name and is_more_than_one_result(directory_soup, last_name):
-#         re_full_name = ("^(?=.*\\b"
-#                         + last_name
-#                         + "\\b)(?=.*\\b"
-#                         + first_name
-#                         + "\\b).*$")
-#         return get_member_number(directory_soup, re_full_name)
-#     else:
-#         return (get_all_member_numbers(directory_soup, first_name)
-#                 if is_more_than_one_result(directory_soup, first_name)
-#                 else get_member_number(directory_soup, first_name))
-
-# # def find_church_member_page(first_name, last_name):
-# #     # Directory Searching
-# #     directory_page = session_requests.get(
-# #         __DIRECTORY_URL,
-# #         headers=dict(referer=__DASHBOARD_URL)
-# #     )
-# #     directory_soup = BeautifulSoup(directory_page.content, 'html.parser')
-# #     if last_name:
-# #         family_query = directory_soup.find_all('h3', string=re.compile(last_name))
-# #         if len(family_query) > 1:
-# #             full_name_regex = "^(?=.*\\b" + last_name + "\\b)(?=.*\\b" + first_name + "\\b).*$"
-# #             return directory_soup.find('h3', string=re.compile(full_name_regex)).find_parent('a')['href']
-# #         else:
-# #             return directory_soup.find('h3', string=re.compile(last_name)).find_parent('a')['href']
-# #     else:
-# #         family_query = directory_soup.find_all('h3', string=re.compile(first_name))
-# #         if len(family_query) > 1:
-# #             return None
-# #         else:
-# #             return directory_soup.find('h3', string=re.compile(first_name)).find_parent('a')['href']
-
-
-# def get_home_phone(family_soup):
-#     member_home = family_soup.find('strong', string=re.compile("Home Phone"))
-#     if member_home:
-#         return member_home.find_parent().select_one('a[href^="tel:"]').text.strip()
-#     return None
-
-
-# def get_cell_phone(family_soup, name, family):
-#     if family is True:
-#         family_member_cell = family_soup.find('h3', string=re.compile(name)).find_parent().select_one('a[href^="tel:"]')
-#         return family_member_cell.text.strip() if family_member_cell else None
-#     else:
-#         single_member_cell = family_soup.find('div', attrs={"class": "tc dir"}).find('a', string=re.compile(r"((\(\d{3}\) ?)|(\d{3}-))?\d{3}-\d{4}"))
-#         return single_member_cell.text.strip() if single_member_cell else None
-#     return None
-
-
-# def get_church_member_phone(first_name, last_name):
-#     global __FAMILY_URL
-#     login_congregate()
-#     # split_names(name)
-#     first_name = first_name.capitalize()
-#     last_name = last_name.capitalize() if last_name else None
-#     church_member_query_result = find_church_member_page(first_name, last_name)
-#     if not church_member_query_result:
-#         return None
-#     __FAMILY_URL += church_member_query_result
-#     result = session_requests.get(
-#         __FAMILY_URL,
-#         headers=dict(referer=__DIRECTORY_URL)
-#     )
-#     family_soup = BeautifulSoup(result.content, 'html.parser')
-#     family = True if family_soup.ul else False
-#     home_phone = get_home_phone(family_soup)
-#     cell_phone = get_cell_phone(family_soup, first_name, family)
-#     phone_numbers = {
-#         "Cell": cell_phone,
-#         "Home": home_phone
-#     }
-#     return phone_numbers
