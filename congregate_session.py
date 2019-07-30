@@ -38,12 +38,15 @@ def get_directory_page_soup():
 
 def get_church_member_page_soup(family_link):
     DIRECTORY_URL = urls['directory_url']
-    FAMILY_URL = urls["family_url"] + family_link
-    church_member_page = session_requests.get(
-        FAMILY_URL,
-        headers=dict(referer=DIRECTORY_URL)
-    )
-    return BeautifulSoup(church_member_page.content, 'html.parser')
+    if family_link:
+        FAMILY_URL = urls["family_url"] + family_link
+        church_member_page = session_requests.get(
+            FAMILY_URL,
+            headers=dict(referer=DIRECTORY_URL)
+        )
+        return BeautifulSoup(church_member_page.content, 'html.parser')
+    else:
+        return None
 
 
 login_congregate()
