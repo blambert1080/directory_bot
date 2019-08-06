@@ -6,6 +6,8 @@ ARG SECRET_PASS
 ENV SECRET_PASS=${SECRET_PASS}
 ARG DIR_BOT_TOKEN
 ENV DIR_BOT_TOKEN=${DIR_BOT_TOKEN}
+ARG DIR_BOT_URL
+ENV DIR_BOT_URL=${DIR_BOT_URL}
 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
