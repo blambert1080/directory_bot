@@ -8,12 +8,10 @@ ARG DIR_BOT_TOKEN
 ENV DIR_BOT_TOKEN=${DIR_BOT_TOKEN}
 ARG DIR_BOT_URL
 ENV DIR_BOT_URL=${DIR_BOT_URL}
-ARG TEST
-ENV TEST=${TEST}}
 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD [ "echo", "$TEST"] && [ "python", "./discord_bot.py" ]
+CMD [ "python", "./discord_bot.py" ]
