@@ -5,4 +5,3 @@ build:
 deployment:
   staging:
     branch: master
-      commands:
