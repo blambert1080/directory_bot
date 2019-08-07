@@ -1,5 +1,4 @@
 
-import re
 import requests
 from bs4 import BeautifulSoup
 from credentials import login, urls
@@ -8,7 +7,7 @@ __DIRECTORY_URL = urls["directory_url"]
 __FAMILY_URL = urls["family_url"]
 
 
-session_requests = requests.session()
+session_requests = requests.sessions.Session
 
 
 def login_congregate():
