@@ -14,5 +14,4 @@ RUN pip install --no-cache-dir -r requirements.txt && apk --update add py-gunico
 
 COPY . .
 
-CMD gunicorn --bind 0.0.0.0:$PORT wsgi
-RUN python ./discord_bot.py
+CMD python ./discord_bot.py && gunicorn --bind 0.0.0.0:$PORT wsgi
