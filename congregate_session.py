@@ -7,7 +7,7 @@ __DIRECTORY_URL = urls["directory_url"]
 __FAMILY_URL = urls["family_url"]
 
 
-session_requests = requests.sessions.Session
+session_requests = requests.session()
 
 
 def login_congregate():
