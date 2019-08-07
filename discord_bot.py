@@ -69,5 +69,5 @@ def make_embedded_clarification(info):
                 "!dir " + str(name) + "```")))
     return embed
 
-print("THIS IS THE TOKEN: " + TOKEN)
+
 client.run(TOKEN)
