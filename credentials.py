@@ -4,6 +4,7 @@ __username = os.environ['DIR_USERNAME']
 __password = os.environ['SECRET_PASS']
 __token = os.environ['DIR_BOT_TOKEN']
 __url_beginning = os.environ['DIR_BOT_URL']
+__port = int(os.environ.get('PORT', 5000))
 __LOGIN_URL = __url_beginning + "/mobile/login"
 __DIRECTORY_URL = __url_beginning + "/mobile/directory"
 __DASHBOARD_URL = __url_beginning + "/mobile/dashboard"
