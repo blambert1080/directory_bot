@@ -15,9 +15,15 @@ async def on_message(message):
 
     if message.content.startswith('!dir'):
         message_contents = message.content.split(" ")
+        names = len(message_contents)
+        if names > 4 or names < 2:
+            embed = make_embedded_error_desc(names)
+            await message.channel.send(embed=embed)
+            return
+
         first_name = str(message_contents[1]).capitalize()
-        last_name = (str(message_contents[2]).capitalize
-                     if len(message_contents) > 2 else None)
+        last_name = (str(message_contents[2]).capitalize()
+                     if names > 2 else None)
         info = get_church_member_info(first_name, last_name)
         embed = (make_embedded_directory(info)
                  if type(info) is dict else make_embedded_clarification(info))
@@ -65,8 +71,23 @@ def make_embedded_clarification(info):
         return embed
     for name in info:
         (embed.add_field(name=name,
-         value=("To get the directory information for this member try\n```" +
-                "!dir " + str(name) + "```")))
+         value=("To get the directory information for this member try\n" +
+                "```!dir " + str(name) + "```")))
+    return embed
+
+
+def make_embedded_error_desc(names):
+    embed = discord.Embed(title="*Input Error*")
+    if (names < 2):
+        (embed.add_field(name="Name Needed",
+         value=("What am I supposed to do? You didn't provide a name.")))
+        (embed.add_field(name="Try",
+         value=("```!dir first_name last_name``` or ```!dir first_name```")))
+    elif (names > 3):
+        (embed.add_field(name="First and Last Name Only",
+         value=("I can only search using the first name and last name")))
+        (embed.add_field(name="Try",
+         value=("```!dir first_name last_name``` or ```!dir first_name```")))
     return embed
 
 

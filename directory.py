@@ -10,13 +10,15 @@ EMAIL_QUERY = 'a[href^="mailto:"]'
 def get_church_member_page(first_name, last_name):
     # Directory Searching
     directory_soup = congregate_session.get_directory_page_soup()
-    if last_name and is_more_than_one_result(directory_soup, last_name):
-        full_name_re = ("^(?=.*\\b"
-                        + last_name
-                        + "\\b)(?=.*\\b"
-                        + first_name
-                        + "\\b).*$")
-        return get_member_number(directory_soup, full_name_re)
+    if last_name:
+        if is_more_than_one_result(directory_soup, last_name):
+            full_name_re = ("^(?=.*\\b"
+                            + last_name
+                            + "\\b)(?=.*\\b"
+                            + first_name
+                            + "\\b).*$")
+            return get_member_number(directory_soup, full_name_re)
+        return get_member_number(directory_soup, last_name)
     else:
         return (get_all_possible_names(directory_soup, first_name)
                 if is_more_than_one_result(directory_soup, first_name)
@@ -53,12 +55,13 @@ def get_member_number(soup, name):
                      .find_parent('a')['href'])
 
 
-def get_all_possible_names(soup, name):
+def get_all_possible_names(soup, name_searched):
     names = []
-    first_name = name
-    for name in soup.find_all('h3', string=re.compile(name)):
+    for name in soup.find_all('h3', string=re.compile(name_searched)):
         name = strip_tag(name)
-        last_name = name.split(',')[0]
+        first_name_start = name.split(', ')[1]
+        first_name = find_matching_first_name(first_name_start, name_searched)
+        last_name = name.split(', ')[0]
         full_name = "{0} {1}".format(first_name, last_name)
         names.append(full_name)
     return names
@@ -148,6 +151,13 @@ def get_single_cell_phone(soup):
     cell_tag = soup.find('h4', string=re.compile("Cell"))
     return (None if not cell_tag
             else strip_tag(cell_tag.find_next_sibling('p').select_one('p a')))
+
+
+def find_matching_first_name(name_result, name_searched):
+    if name_searched in name_result and "&" in name_result:
+        return name_searched
+    else:
+        return name_result.split(" & ")[0]
 
 
 def strip_tag(tag):
