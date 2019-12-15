@@ -15,15 +15,16 @@ async def on_message(message):
 
     if message.content.startswith('!dir'):
         message_contents = message.content.split(" ")
-        names = len(message_contents)
-        if names > 4 or names < 2:
-            embed = make_embedded_error_desc(names)
+        
+        num_names = len(message_contents)
+        if num_names > 4 or num_names < 2:
+            embed = make_embedded_error_desc(num_names)
             await message.channel.send(embed=embed)
             return
 
         first_name = str(message_contents[1]).capitalize()
         last_name = (str(message_contents[2]).capitalize()
-                     if names > 2 else None)
+                     if num_names > 2 else None)
         info = get_church_member_info(first_name, last_name)
         embed = (make_embedded_directory(info)
                  if type(info) is dict else make_embedded_clarification(info))
@@ -39,7 +40,7 @@ async def on_ready():
 
 
 def make_embedded_directory(info):
-    embed = discord.Embed(title="*West Allen Church Directory*")
+    embed = discord.Embed(title="*Twin Creeks Church Directory*")
     populate = True
     for member in info:
         embed.set_image(url=info[member]["image"])
