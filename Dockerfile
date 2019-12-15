@@ -1,8 +1,8 @@
-FROM python:3.7.4-alpine3.10
+FROM python:3.8.1-alpine3.10
 
 COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+RUN apk add py-pip python-dev libffi-dev openssl-dev gcc libc-dev make && pip3 install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD python ./discord_bot.py
+CMD python3 ./discord_bot.py
