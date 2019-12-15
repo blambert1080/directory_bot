@@ -67,7 +67,6 @@ def get_all_possible_names(soup, name_searched):
     return names
 
 
-# TODO: Add Address
 def process_family_members(soup):
     address = get_address(soup)
     image = get_image(soup)
@@ -86,7 +85,6 @@ def process_family_members(soup):
     return family_members
 
 
-# TODO: Fix Address
 def process_single_members(soup):
     address = get_address(soup)
     image = get_image(soup)
@@ -155,9 +153,10 @@ def get_single_cell_phone(soup):
 
 def find_matching_first_name(name_result, name_searched):
     if name_searched in name_result and "&" in name_result:
-        return name_searched
+        names = re.split(' & | |\(|\)', name_result)
+        return list(filter(lambda name: name_searched in name, names))[0]
     else:
-        return name_result.split(" & ")[0]
+        return name_result.split(" ")[0]
 
 
 def strip_tag(tag):
