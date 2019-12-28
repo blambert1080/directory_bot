@@ -3,7 +3,6 @@ from credentials import login
 from directory import get_church_member_info
 
 
-EMBED = discord.Embed(title="*Twin Creeks Church Directory*")
 TOKEN = login['token']
 client = discord.Client()
 
@@ -108,29 +107,6 @@ def make_specific_embed(info, name, commands):
                     "```-hp     Return the home phone number```"),
                     inline=False)
     return embed
-
-
-def make_embedded_address(info, name):
-    members = [key for key in info.keys() if name in key]
-    for member in members:
-        EMBED.add_field(name="Address",
-                        value=info[member]["address"], inline=False)
-
-
-def make_embedded_email(info, name):
-    members = [key for key in info.keys() if name in key]
-    for member in members:
-        EMBED.add_field(name="Email",
-                        value=info[member]["email"], inline=False)
-
-
-def make_embedded_phone_numbers(info, name):
-    members = [key for key in info.keys() if name in key]
-    for member in members:
-        EMBED.add_field(name="Home Phone",
-                        value=info[member]["home_phone"], inline=True)
-        EMBED.add_field(name="Cell Phone",
-                        value=info[member]["cell_phone"], inline=True)
 
 
 def make_embedded_clarification(info):
