@@ -2,27 +2,26 @@ import congregate_session
 import re
 
 
-DATE_RE = "^[0-9]{2}\/[0-9]{2}"
-CELL_QUERY = 'a[href^="tel:"]'
-EMAIL_QUERY = 'a[href^="mailto:"]'
+DATE_RE = r'^[0-9]{2}\/[0-9]{2}'
+FULL_NAME_RE = "^(?=.*\\b{0}\\b)(?=.*\\b{1}\\b).*$"
+FIRST_NAME_RE = "(?=.*\\b{}).*$"
+LAST_NAME_RE = "^(?=.*\\b{}\\b)"
+CELL_QUERY = r'a[href^="tel:"]'
+EMAIL_QUERY = r'a[href^="mailto:"]'
 
 
 def get_church_member_page(first_name, last_name):
     # Directory Searching
     directory_soup = congregate_session.get_directory_page_soup()
     if last_name:
-        if is_more_than_one_result(directory_soup, last_name):
-            full_name_re = ("^(?=.*\\b"
-                            + last_name
-                            + "\\b)(?=.*\\b"
-                            + first_name
-                            + "\\b).*$")
-            return get_member_number(directory_soup, full_name_re)
-        return get_member_number(directory_soup, last_name)
+        if is_more_than_one_result(directory_soup, last_name, False):
+            return get_member_number(
+                directory_soup, FULL_NAME_RE.format(last_name, first_name))
+        return get_member_number(directory_soup, last_name, False)
     else:
         return (get_all_possible_names(directory_soup, first_name)
-                if is_more_than_one_result(directory_soup, first_name)
-                else get_member_number(directory_soup, first_name))
+                if is_more_than_one_result(directory_soup, first_name, True)
+                else get_member_number(directory_soup, first_name, True))
 
 
 def get_church_member_info(first_name, last_name):
@@ -45,23 +44,33 @@ def process_results(family_link):
             else process_single_members(family_soup))
 
 
-def is_more_than_one_result(soup, name):
-    return len(soup.find_all('h3', string=re.compile(name))) > 1
+def is_more_than_one_result(soup, name, is_first_name):
+    name_re = (FIRST_NAME_RE.format(name) if is_first_name
+               else LAST_NAME_RE.format(name))
+    names = soup.find_all('h3', string=re.compile(name_re, re.IGNORECASE))
+    return len(names) > 1
 
 
-def get_member_number(soup, name):
-    return (None if not soup.find('h3', string=re.compile(name))
-            else soup.find('h3', string=re.compile(name))
-                     .find_parent('a')['href'])
+def get_member_number(soup, name, is_first_name):
+    name_re = (FIRST_NAME_RE.format(name) if is_first_name
+               else LAST_NAME_RE.format(name))
+    name_found = soup.find('h3', string=re.compile(name_re, re.IGNORECASE))
+    return (None if not name_found else name_found.find_parent('a')['href'])
 
 
 def get_all_possible_names(soup, name_searched):
+    name_re = FIRST_NAME_RE.format(name_searched)
     names = []
-    for name in soup.find_all('h3', string=re.compile(name_searched)):
+    for name in soup.find_all('h3', string=re.compile(name_re, re.IGNORECASE)):
         name = strip_tag(name)
-        first_name_start = name.split(', ')[1]
-        first_name = find_matching_first_name(first_name_start, name_searched)
-        last_name = name.split(', ')[0]
+        name_chunks = name.split(', ')
+        if name_searched in name_chunks[0].lower():
+            last_name = name_chunks[0]
+            first_name = name_chunks[1].split(' ')[0]
+        else:
+            first_name_start = name.split(', ')[1]
+            first_name = find_matching_first_name(first_name_start, name_searched)
+            last_name = name.split(', ')[0]
         full_name = "{0} {1}".format(first_name, last_name)
         names.append(full_name)
     return names
@@ -152,11 +161,8 @@ def get_single_cell_phone(soup):
 
 
 def find_matching_first_name(name_result, name_searched):
-    if name_searched in name_result and "&" in name_result:
-        names = re.split(' & | |\(|\)', name_result)
-        return list(filter(lambda name: name_searched in name, names))[0]
-    else:
-        return name_result.split(" ")[0]
+    names = re.split(r' & | |\(|\)', name_result)
+    return [name for name in names if name_searched in name.lower()][0]
 
 
 def strip_tag(tag):
