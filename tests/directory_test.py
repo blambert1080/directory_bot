@@ -58,3 +58,4 @@ def test_process_single_member_info():
     assert name_result == name_check, (
         ("Names are not equal\nResult:\n{0}\nCheck:\n{1}\n"
             .format(name_result, name_check)))
+
